@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CEP</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Bolhas decorativas */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .circle:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+        }
+
+        .circle:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .glass-card {
+            width: 100%;
+            max-width: 550px;
+            padding: 40px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            color: white;
+            z-index: 1;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title i {
+            font-size: 50px;
+            color: #00d4ff;
+        }
+
+        .title h1 {
+            font-size: 32px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            height: 55px;
+            border-radius: 15px;
+            border: none;
+            padding-left: 20px;
+            font-size: 18px;
+        }
+
+        .btn-search {
+            width: 100%;
+            height: 55px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(90deg, #00d4ff, #0072ff);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-search:hover {
+            transform: scale(1.03);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .result-item strong {
+            color: #00d4ff;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.7;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Elementos decorativos -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <div class="glass-card">
+
+        <div class="title">
+            <i class="bi bi-pin-map-fill"></i>
+            <h1>Consulta CEP</h1>
+            <p>Busque informações do endereço rapidamente</p>
+        </div>
+
+        <div class="mb-3">
+            <input
+                type="text"
+                id="myInput"
+                class="form-control"
+                placeholder="Digite o CEP">
+        </div>
+
+        <button onclick="buscarCEP()" class="btn-search">
+            <i class="bi bi-search"></i>
+            Consultar Agora
+        </button>
+
+        <div class="result-box" id="resultado">
+
+            <div class="result-item">
+                <strong>CEP:</strong>
+                <span id="cep"></span>
+            </div>
+
+            <div class="result-item">
+                <strong>Logradouro:</strong>
+                <span id="logradouro"></span>
+            </div>
+
+            <div class="result-item">
+                <strong>Bairro:</strong>
+                <span id="bairro"></span>
+            </div>
+
+            <div class="result-item">
+                <strong>Cidade:</strong>
+                <span id="cidade"></span>
+            </div>
+
+            <div class="result-item">
+                <strong>Estado:</strong>
+                <span id="estado"></span>
+            </div>
+
+        </div>
+
+        <div class="footer-text">
+            Desenvolvido com HTML, CSS, Bootstrap e JavaScript
+        </div>
+
+    </div>
+
+    <script>
+
+        async function buscarCEP() {
+
+            let cep = document.getElementById("myInput").value
+            let resultado = document.getElementById("resultado")
+
+            cep = cep.replace(/\D/g, "")
+
+            if (cep.length !== 8) {
+                alert("Digite um CEP válido!")
+                return
+            }
+
+            try {
+
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                const data = await response.json()
+
+                if (data.erro) {
+                    alert("CEP não encontrado!")
+                    return
+                }
+
+                document.getElementById("cep").innerHTML = data.cep
+                document.getElementById("logradouro").innerHTML = data.logradouro
+                document.getElementById("bairro").innerHTML = data.bairro
+                document.getElementById("cidade").innerHTML = data.localidade
+                document.getElementById("estado").innerHTML = data.uf
+
+                resultado.style.display = "block"
+
+            } catch (error) {
+
+                alert("Erro ao buscar CEP!")
+                console.log(error)
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
